@@ -1,28 +1,28 @@
 /* Burrow Brand Design System */
 :root {
-  --brand-primary: #A67C52;
-  --brand-dark: #4E342E;
-  --brand-cream: #FFFDD0;
+  --brand-primary: #a67c52;
+  --brand-dark: #4e342e;
+  --brand-cream: #fffdd0;
   --brand-teal: #006994;
-  --brand-magenta: #D946EF;
-  --brand-purple: #8B5CF6;
-  --brand-orange: #FF7A00;
+  --brand-magenta: #d946ef;
+  --brand-purple: #8b5cf6;
+  --brand-orange: #ff7a00;
 
-  --gradient-primary: linear-gradient(135deg, #A67C52 0%, #FFFDD0 100%);
-  --gradient-accent: linear-gradient(135deg, #006994 0%, #8B5CF6 100%);
-  --gradient-warm: linear-gradient(135deg, #A67C52 0%, #FF7A00 100%);
-  --gradient-blue: linear-gradient(135deg, #006994 0%, #A67C52 100%);
+  --gradient-primary: linear-gradient(135deg, #a67c52 0%, #fffdd0 100%);
+  --gradient-accent: linear-gradient(135deg, #006994 0%, #8b5cf6 100%);
+  --gradient-warm: linear-gradient(135deg, #a67c52 0%, #ff7a00 100%);
+  --gradient-blue: linear-gradient(135deg, #006994 0%, #a67c52 100%);
 
-  --bg-light: #FFFDD0;
+  --bg-light: #fffdd0;
   --bg-surface: rgba(166, 124, 82, 0.05);
   --bg-card: rgba(255, 255, 255, 0.8);
-  --text-dark: #4E342E;
-  --text-muted: #6B5B47;
-  --text-light: #FFFFFF;
+  --text-dark: #4e342e;
+  --text-muted: #6b5b47;
+  --text-light: #ffffff;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.6;
   color: var(--text-dark);
   background: var(--bg-light);
@@ -38,6 +38,7 @@ body {
     rgba(255, 255, 255, 1) 100%
   );
   min-height: 100vh;
+  padding-top: 80px;
 }
 
 .gradient-text {
@@ -56,10 +57,16 @@ body {
 
 /* Navigation styles */
 nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   padding: 1rem 0;
   border-bottom: 1px solid rgba(166, 124, 82, 0.2);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .nav-container {
@@ -110,7 +117,7 @@ nav {
 
 /* Improved text contrast on gradient background */
 .gradient-background .gradient-text {
-  background: linear-gradient(135deg, #4E342E 0%, #A67C52 50%, #6B5B47 100%);
+  background: linear-gradient(135deg, #4e342e 0%, #a67c52 50%, #6b5b47 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -119,7 +126,7 @@ nav {
 }
 
 .gradient-background .hero p {
-  color: #4E342E;
+  color: #4e342e;
   font-weight: 500;
   text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
 }
