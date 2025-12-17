@@ -10,7 +10,7 @@ import Navigation from '../components/Navigation.astro';
       <section class="hero">
         <div class="hero-content">
           <div class="hero-text">
-            <h1><img src={`${import.meta.env.BASE_URL}burrow-title-only.svg`} alt="Burrow" class="hero-title-svg" /></h1>
+            <h1 class="hero-title">Burrow</h1>
             <p class="tagline">
               A self-hosted data ingestion pipeline and retrieval API that streamlines and accelerates the development of RAG applications
             </p>
@@ -192,10 +192,14 @@ import Navigation from '../components/Navigation.astro';
   margin-bottom: 1.5rem;
 }
 
-.hero-title-svg {
-  height: 4rem;
-  width: auto;
-  display: block;
+.hero-title {
+  font-size: 6rem;
+  font-weight: 485;
+  color: #4e342e;
+  display: inline-block;
+  margin: 0;
+  letter-spacing: -0.08em;
+  font-family: 'Poppins', sans-serif;
 }
 
 .tagline {

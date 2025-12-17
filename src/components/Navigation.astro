@@ -8,11 +8,12 @@ const currentPath = Astro.url.pathname;
       <div class="logo">
         <a href="/" class="logo-link">
           <img src={`${import.meta.env.BASE_URL}burrow-logo-only.svg`} alt="Burrow Logo" class="logo-img" />
-          <img src={`${import.meta.env.BASE_URL}burrow-title-only.svg`} alt="Burrow" class="logo-text-svg" />
+          <span class="logo-text">Burrow</span>
         </a>
       </div>
       <ul class="nav-links">
         <li><a href="/case-study" class={currentPath === '/case-study' ? 'active' : ''}>Case Study</a></li>
+        <li><a href="/docs" class={currentPath === '/docs' ? 'active' : ''}>Docs</a></li>
         <li><a href="/team" class={currentPath === '/team' ? 'active' : ''}>Team</a></li>
         <li><a href="https://github.com/your-username/burrow" target="_blank" rel="noopener noreferrer">GitHub</a></li>
       </ul>
@@ -38,9 +39,13 @@ const currentPath = Astro.url.pathname;
   width: auto;
 }
 
-.logo-text-svg {
-  height: 32px;
-  width: auto;
+.logo-text {
+  font-size: 1.75rem;
+  font-weight: 450;
+  color: #4e342e;
+  letter-spacing: -0.06em;
+  font-family: 'Poppins', sans-serif;
+  display: inline-block;
 }
 
 .nav-links .active {

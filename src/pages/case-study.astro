@@ -1,8 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Navigation from '../components/Navigation.astro';
-import pipelineApi from '../data/pipeline-api.json';
-import ragApi from '../data/rag-api.json';
 
 // Process the markdown content dynamically
 import { readFileSync } from 'fs';
@@ -111,35 +109,6 @@ sections.forEach((section, index) => {
   console.log(`${index + 1}. ${section.title} (${section.subsections.length} subsections)`);
 });
 
-// Process the Pipeline API spec safely
-const pipelineApiInfo = pipelineApi.info;
-const pipelineEndpoints = Object.entries(pipelineApi.paths).map(([path, methods]) => {
-  const httpMethods = Object.entries(methods).map(([method, details]) => ({
-    method: method.toUpperCase(),
-    methodClass: method,
-    ...details
-  }));
-  return { path, methods: httpMethods };
-});
-
-// Extract Pipeline API schemas for reference
-const pipelineSchemas = pipelineApi.components?.schemas || {};
-const pipelineSecuritySchemes = pipelineApi.components?.securitySchemes || {};
-
-// Process the RAG API spec safely
-const ragApiInfo = ragApi.info;
-const ragEndpoints = Object.entries(ragApi.paths).map(([path, methods]) => {
-  const httpMethods = Object.entries(methods).map(([method, details]) => ({
-    method: method.toUpperCase(),
-    methodClass: method,
-    ...details
-  }));
-  return { path, methods: httpMethods };
-});
-
-// Extract RAG API schemas for reference
-const ragSchemas = ragApi.components?.schemas || {};
-const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
 ---
 
 <Layout title="Burrow - Case Study" description="Detailed case study of the Burrow project">
@@ -175,26 +144,11 @@ const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
           </div>
 
 
-          <!-- API Section -->
-          <div class="sidebar-nav-section">
-            <button class="sidebar-nav-header" data-section="api">
-              <span>API</span>
-              <span class="sidebar-arrow">▶</span>
-            </button>
-            <ul class="sidebar-nav-subsections" id="api-sections">
-              <li><a href="#rag-api">RAG API</a></li>
-              <li><a href="#pipeline-api">Pipeline API</a></li>
-            </ul>
-          </div>
         </nav>
       </aside>
 
       <!-- Main Content -->
       <article class="content">
-        <header class="content-header">
-          <h1>Introducing Burrow</h1>
-        </header>
-
 {sections.map(section => (
           <section id={section.id} class="content-section">
             <h2>{section.title}</h2>
@@ -214,232 +168,6 @@ const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
           </section>
         ))}
 
-        <section id="pipeline-api" class="content-section">
-          <h2>{pipelineApiInfo.title}</h2>
-          <p>
-            The Pipeline API handles document ingestion, processing, and management operations. It provides endpoints for uploading documents, tracking their processing status, and managing the document lifecycle.
-          </p>
-
-          <div class="api-section">
-            <h3>Authentication</h3>
-            <p>Authentication is required using <code>{pipelineSecuritySchemes.ApiKeyAuth?.name || 'x-api-token'}</code> header with your API token.</p>
-
-            <h3>Base URL</h3>
-            <pre><code>https://your-burrow-instance.com</code></pre>
-
-            <h3>API Endpoints</h3>
-            {pipelineEndpoints.map(endpoint => (
-              <div class="endpoint-group">
-                <h4 class="endpoint-path">{endpoint.path}</h4>
-
-                {endpoint.methods.map(method => (
-                  <div class="endpoint">
-                    <div class="endpoint-header">
-                      <span class={`method method-${method.methodClass}`}>{method.method}</span>
-                      <span class="endpoint-summary">{method.summary}</span>
-                    </div>
-
-                    <p class="endpoint-description">{method.description}</p>
-
-                    {method.parameters && method.parameters.length > 0 && (
-                      <div class="parameters-section">
-                        <h5>Parameters</h5>
-                        <ul class="parameters-list">
-                          {method.parameters.map(param => (
-                            <li>
-                              <strong>{param.name}</strong>
-                              <span class="param-type">({param.in}, {param.required ? 'required' : 'optional'})</span>
-                              {param.schema?.type && <span class="param-schema">{param.schema.type}</span>}
-                              {param.description && <span class="param-description">- {param.description}</span>}
-                              {param.schema?.enum && (
-                                <div class="param-enum">
-                                  Options: {param.schema.enum.join(', ')}
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {method.requestBody && (
-                      <div class="request-section">
-                        <h5>Request Body</h5>
-                        <p>{method.requestBody.description}</p>
-                        {Object.entries(method.requestBody.content).map(([contentType, content]) => (
-                          <div class="content-type">
-                            <strong>{contentType}</strong>
-                            {content.schema?.properties && (
-                              <ul>
-                                {Object.entries(content.schema.properties).map(([propName, propDetails]) => (
-                                  <li>
-                                    <strong>{propName}</strong>: {propDetails.type}
-                                    {propDetails.description && ` - ${propDetails.description}`}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div class="responses-section">
-                      <h5>Responses</h5>
-                      {Object.entries(method.responses).map(([statusCode, response]) => (
-                        <div class="response">
-                          <h6 class={`status-code status-${statusCode.charAt(0)}`}>
-                            {statusCode} - {response.description}
-                          </h6>
-                          {response.content?.['application/json']?.schema && (
-                            <div class="response-schema">
-                              <strong>Response Schema:</strong>
-                              <pre><code>{JSON.stringify(response.content['application/json'].schema, null, 2)}</code></pre>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            {Object.keys(pipelineSchemas).length > 0 && (
-              <div class="schemas-section">
-                <h3>Data Models</h3>
-                {Object.entries(pipelineSchemas).map(([schemaName, schema]) => (
-                  <div class="schema">
-                    <h4>{schemaName}</h4>
-                    <pre><code>{JSON.stringify(schema, null, 2)}</code></pre>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-
-        <section id="rag-api" class="content-section">
-          <h2>{ragApiInfo.title}</h2>
-          <p>
-            {ragApiInfo.description}. The RAG API provides endpoints for querying documents, retrieving relevant content, and performing vector similarity searches across your ingested data.
-          </p>
-
-          <div class="api-section">
-            <h3>Authentication</h3>
-            <p>Authentication is required using <code>{ragSecuritySchemes.APIKeyHeader?.name || 'x-api-token'}</code> header with your API token.</p>
-
-            <h3>Base URL</h3>
-            <pre><code>https://your-burrow-instance.com{ragApi.servers?.[0]?.url || ''}</code></pre>
-
-            <h3>API Endpoints</h3>
-            {ragEndpoints.map(endpoint => (
-              <div class="endpoint-group">
-                <h4 class="endpoint-path">{endpoint.path}</h4>
-
-                {endpoint.methods.map(method => (
-                  <div class="endpoint">
-                    <div class="endpoint-header">
-                      <span class={`method method-${method.methodClass}`}>{method.method}</span>
-                      <span class="endpoint-summary">{method.summary}</span>
-                    </div>
-
-                    <p class="endpoint-description">{method.description}</p>
-
-                    {method.parameters && method.parameters.length > 0 && (
-                      <div class="parameters-section">
-                        <h5>Parameters</h5>
-                        <ul class="parameters-list">
-                          {method.parameters.map(param => (
-                            <li>
-                              <strong>{param.name}</strong>
-                              <span class="param-type">({param.in}, {param.required ? 'required' : 'optional'})</span>
-                              {param.schema?.type && <span class="param-schema">{param.schema.type}</span>}
-                              {param.description && <span class="param-description">- {param.description}</span>}
-                              {param.schema?.enum && (
-                                <div class="param-enum">
-                                  Options: {param.schema.enum.join(', ')}
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {method.requestBody && (
-                      <div class="request-section">
-                        <h5>Request Body</h5>
-                        <p>{method.requestBody.description}</p>
-                        {Object.entries(method.requestBody.content).map(([contentType, content]) => (
-                          <div class="content-type">
-                            <strong>{contentType}</strong>
-                            {content.schema?.$ref && (
-                              <div class="schema-ref">
-                                <strong>Schema:</strong> {content.schema.$ref.split('/').pop()}
-                                {ragSchemas[content.schema.$ref.split('/').pop()] && (
-                                  <pre><code>{JSON.stringify(ragSchemas[content.schema.$ref.split('/').pop()], null, 2)}</code></pre>
-                                )}
-                              </div>
-                            )}
-                            {content.schema?.properties && (
-                              <ul>
-                                {Object.entries(content.schema.properties).map(([propName, propDetails]) => (
-                                  <li>
-                                    <strong>{propName}</strong>: {propDetails.type}
-                                    {propDetails.description && ` - ${propDetails.description}`}
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    <div class="responses-section">
-                      <h5>Responses</h5>
-                      {Object.entries(method.responses).map(([statusCode, response]) => (
-                        <div class="response">
-                          <h6 class={`status-code status-${statusCode.charAt(0)}`}>
-                            {statusCode} - {response.description}
-                          </h6>
-                          {response.content?.['application/json']?.schema && (
-                            <div class="response-schema">
-                              <strong>Response Schema:</strong>
-                              {response.content['application/json'].schema.$ref ? (
-                                <div>
-                                  <em>{response.content['application/json'].schema.$ref.split('/').pop()}</em>
-                                  {ragSchemas[response.content['application/json'].schema.$ref.split('/').pop()] && (
-                                    <pre><code>{JSON.stringify(ragSchemas[response.content['application/json'].schema.$ref.split('/').pop()], null, 2)}</code></pre>
-                                  )}
-                                </div>
-                              ) : (
-                                <pre><code>{JSON.stringify(response.content['application/json'].schema, null, 2)}</code></pre>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-
-            {Object.keys(ragSchemas).length > 0 && (
-              <div class="schemas-section">
-                <h3>Data Models</h3>
-                {Object.entries(ragSchemas).map(([schemaName, schema]) => (
-                  <div class="schema">
-                    <h4>{schemaName}</h4>
-                    <pre><code>{JSON.stringify(schema, null, 2)}</code></pre>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
       </article>
     </div>
   </main>
