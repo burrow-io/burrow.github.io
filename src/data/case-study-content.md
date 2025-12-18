@@ -135,7 +135,7 @@ Burrow fills this gap between managed services and DIY approaches. It's not as f
 
 Burrow is built on three core value propositions:
 
-1. **Ease of getting documents into a database** via both friendly GUI and RESTful endpoints
+1. **Ease of getting documents into a database** via both friendly <span class="highlight-emphasis">GUI and RESTful endpoints</span>
 2. **State-of-the-art document processing**: Layout-aware parsing along with intelligent chunking that preserves document structure using the Docling library.
 3. **Production-grade retrieval**: A RAG API with togglable parameters for hybrid search, reranking, and metadata filtering.
 4. **Self-hosted serverless architecture**: Automated deployment to your AWS environment. Performance and cost scale based on usage patterns.

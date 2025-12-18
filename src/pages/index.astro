@@ -9,6 +9,9 @@ import Navigation from '../components/Navigation.astro';
     <div class="container">
       <section class="hero">
         <div class="hero-content">
+          <div class="hero-logo">
+            <img src={`${import.meta.env.BASE_URL}nut-with-doc.png`} alt="Burrow Logo" class="hero-logo-img" />
+          </div>
           <div class="hero-text">
             <h1 class="hero-title">Burrow</h1>
             <p class="tagline">
@@ -19,9 +22,6 @@ import Navigation from '../components/Navigation.astro';
               <a href="/case-study" class="btn-secondary">Read Docs</a>
             </div>
           </div>
-          <div class="hero-logo">
-            <img src={`${import.meta.env.BASE_URL}nut-with-doc.png`} alt="Burrow Logo" class="hero-logo-img" />
-          </div>
         </div>
       </section>
     </div>
@@ -31,28 +31,16 @@ import Navigation from '../components/Navigation.astro';
   <section class="content-sections">
     <div class="container">
       <section class="feature-section feature-with-image">
-        <div class="feature-content">
-          <h2>Simplified AWS Deployment Using the Burrow CLI</h2>
-          <p>
-            Automated deployment to your AWS environment using a self-hosted, serverless architecture where performance and cost scale based on usage patterns.
-          </p>
+        <div class="feature-image feature-image-video">
+          <video src={`${import.meta.env.BASE_URL}vid-burrow.mp4`} controls autoplay loop muted class="feature-video">
+            Your browser does not support the video tag.
+          </video>
         </div>
-        <div class="feature-image">
-          <img src={`${import.meta.env.BASE_URL}cli-ascii.png`} alt="Burrow CLI Screenshot" />
-        </div>
-      </section>
-
-      <section class="feature-section feature-with-image">
         <div class="feature-content">
           <h2>Automated Ingestion Pipeline</h2>
           <p>
-            Ease of getting documents into a database via both friendly GUI and RESTful endpoints, the pipeline takes care of the rest.
+            Ease of getting documents into a database via both friendly <span class="highlight-emphasis">GUI</span> and <span class="highlight-emphasis">RESTful endpoints</span>, the pipeline takes care of the rest.
           </p>
-        </div>
-        <div class="feature-image">
-          <video src={`${import.meta.env.BASE_URL}vid-burrow.mp4`} controls class="feature-video">
-            Your browser does not support the video tag.
-          </video>
         </div>
       </section>
 
@@ -60,7 +48,7 @@ import Navigation from '../components/Navigation.astro';
         <div class="feature-content">
           <h2>Intelligent Document Processing & Retrieval</h2>
           <p>
-            Layout-aware document processing and structure-preserving chunking, combined with a production-grade RAG API offering hybrid search, reranking, and metadata filtering.
+            <span class="highlight-emphasis">Layout-aware</span> document processing and <span class="highlight-emphasis">structure-preserving</span> chunking, combined with a production-grade RAG API offering <span class="highlight-emphasis">hybrid search</span>, <span class="highlight-emphasis">reranking</span>, and <span class="highlight-emphasis">metadata filtering</span>.
           </p>
         </div>
         <div class="feature-visual">
@@ -99,6 +87,18 @@ import Navigation from '../components/Navigation.astro';
               <span class="badge badge-emphasized">Metadata Filtering</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="feature-section feature-with-image">
+        <div class="feature-image feature-image-cli">
+          <img src={`${import.meta.env.BASE_URL}cli-ascii.png`} alt="Burrow CLI Screenshot" class="cli-image" />
+        </div>
+        <div class="feature-content">
+          <h2>Simplified AWS Deployment Using the Burrow CLI</h2>
+          <p>
+            Automated deployment to your AWS environment using a <span class="highlight-emphasis">self-hosted</span>, <span class="highlight-emphasis">serverless architecture</span> where performance and cost <span class="highlight-emphasis">scale</span> based on usage patterns.
+          </p>
         </div>
       </section>
 
@@ -186,6 +186,7 @@ import Navigation from '../components/Navigation.astro';
   );
   padding: 0;
   position: relative;
+  transition: background-color 0.3s ease, background-image 0.3s ease;
 }
 
 .content-sections .container {
@@ -193,6 +194,7 @@ import Navigation from '../components/Navigation.astro';
   flex-direction: column;
   gap: 6rem;
   padding: 6rem 2rem;
+  background: transparent;
 }
 
 .content-sections::before {
@@ -203,6 +205,7 @@ import Navigation from '../components/Navigation.astro';
   right: 0;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(0, 105, 148, 0.15), transparent);
+  transition: background 0.3s ease;
 }
 
 .feature-section {
@@ -271,15 +274,27 @@ import Navigation from '../components/Navigation.astro';
 }
 
 .feature-section p {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--text-muted);
-  line-height: 1.8;
+  line-height: 2;
   margin: 0;
-  transition: color 0.3s ease;
+  font-weight: 400;
+}
+
+.highlight-emphasis {
+  color: #006994 !important;
+  font-weight: 700;
+}
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .feature-content:hover .feature-section p {
-  color: rgba(0, 0, 0, 0.75);
+  color: rgba(0, 0, 0, 0.85);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .feature-image {
@@ -307,7 +322,7 @@ import Navigation from '../components/Navigation.astro';
 
 
 .feature-image img {
-  max-width: 60%;
+  max-width: 65%;
   height: auto;
   border-radius: 20px;
   border: 1px solid rgba(0, 0, 0, 0.06);
@@ -321,6 +336,65 @@ import Navigation from '../components/Navigation.astro';
   background: white;
   display: block;
   filter: brightness(1.02) contrast(1.01);
+}
+
+.feature-image-cli {
+  position: relative;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 105, 148, 0.08) 0%, rgba(166, 124, 82, 0.08) 50%, rgba(0, 105, 148, 0.06) 100%);
+  border-radius: 24px;
+  backdrop-filter: blur(12px);
+  max-width: 75%;
+  margin: 0 auto;
+}
+
+.feature-image-cli::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.12) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cli-image {
+  max-width: 85% !important;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 24px 72px rgba(0, 0, 0, 0.15),
+    0 12px 32px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 105, 148, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+  position: relative;
+  z-index: 1;
+  filter: brightness(1.03) contrast(1.02) saturate(1.05);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-image-cli:hover {
+  transform: translateY(-4px);
+}
+
+.feature-image-cli:hover .cli-image {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 
+    0 32px 96px rgba(0, 0, 0, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.14),
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 105, 148, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  filter: brightness(1.05) contrast(1.03) saturate(1.08);
+}
+
+.feature-image-cli:hover::before {
+  background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.18) 0%, transparent 60%);
 }
 
 .feature-image video {
@@ -339,6 +413,64 @@ import Navigation from '../components/Navigation.astro';
   display: block;
   margin: 0 auto;
   overflow: hidden;
+}
+
+.feature-image-video {
+  position: relative;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 105, 148, 0.08) 0%, rgba(166, 124, 82, 0.08) 50%, rgba(0, 105, 148, 0.06) 100%);
+  border-radius: 24px;
+  backdrop-filter: blur(12px);
+  max-width: 95%;
+  margin: 0 auto;
+}
+
+.feature-image-video::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+  background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.12) 0%, transparent 60%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.feature-image-video .feature-video {
+  max-width: 100% !important;
+  border-radius: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 24px 72px rgba(0, 0, 0, 0.15),
+    0 12px 32px rgba(0, 0, 0, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 105, 148, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  position: relative;
+  z-index: 1;
+  filter: brightness(1.03) contrast(1.02) saturate(1.05);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-image-video:hover {
+  transform: translateY(-4px);
+}
+
+.feature-image-video:hover .feature-video {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 
+    0 32px 96px rgba(0, 0, 0, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.14),
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(0, 105, 148, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+  filter: brightness(1.05) contrast(1.03) saturate(1.08);
+}
+
+.feature-image-video:hover::before {
+  background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.18) 0%, transparent 60%);
 }
 
 
@@ -362,9 +494,6 @@ import Navigation from '../components/Navigation.astro';
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.feature-visual:hover {
-  transform: translateY(-6px);
-}
 
 .processing-flow {
   display: flex;
@@ -372,9 +501,8 @@ import Navigation from '../components/Navigation.astro';
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 3.5rem;
+  padding: 2rem 1rem;
   background: linear-gradient(135deg, rgba(0, 105, 148, 0.15) 0%, rgba(166, 124, 82, 0.15) 50%, rgba(0, 105, 148, 0.12) 100%);
-  backdrop-filter: blur(24px);
   border-radius: 24px;
   border: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 
@@ -386,7 +514,7 @@ import Navigation from '../components/Navigation.astro';
   max-width: 100%;
   position: relative;
   z-index: 1;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
@@ -400,21 +528,18 @@ import Navigation from '../components/Navigation.astro';
   background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.2) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
+  transition: background 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .processing-flow:hover {
-  transform: translateY(-12px) scale(1.01);
+  transform: translateY(-8px);
   box-shadow: 
     0 32px 80px rgba(0, 0, 0, 0.18),
     0 12px 32px rgba(0, 0, 0, 0.12),
     0 0 0 1px rgba(255, 255, 255, 0.6) inset,
     0 1px 2px rgba(0, 0, 0, 0.06) inset;
-  background: linear-gradient(135deg, rgba(0, 105, 148, 0.18) 0%, rgba(166, 124, 82, 0.18) 50%, rgba(0, 105, 148, 0.15) 100%);
 }
 
-.processing-flow:hover::before {
-  background: radial-gradient(circle at 30% 30%, rgba(0, 105, 148, 0.25) 0%, transparent 50%);
-}
 
 .flow-top-row {
   display: flex;
@@ -430,18 +555,17 @@ import Navigation from '../components/Navigation.astro';
   align-items: center;
   justify-content: center;
   padding: 1.75rem 2.5rem;
-  background: linear-gradient(135deg, rgba(0, 105, 148, 0.12) 0%, rgba(33, 150, 243, 0.1) 25%, rgba(66, 165, 245, 0.08) 50%, rgba(33, 150, 243, 0.1) 75%, rgba(0, 105, 148, 0.12) 100%);
-  backdrop-filter: blur(12px);
+  background: linear-gradient(135deg, rgba(255, 235, 59, 0.12) 0%, rgba(255, 245, 157, 0.1) 25%, rgba(255, 193, 7, 0.08) 50%, rgba(255, 245, 157, 0.1) 75%, rgba(255, 235, 59, 0.12) 100%);
   border-radius: 24px;
-  border: 2px solid rgba(0, 105, 148, 0.2);
+  border: 2px solid rgba(255, 193, 7, 0.2);
   box-shadow: 
-    0 8px 24px rgba(0, 105, 148, 0.1),
-    0 4px 12px rgba(33, 150, 243, 0.08),
+    0 8px 24px rgba(255, 193, 7, 0.1),
+    0 4px 12px rgba(255, 235, 59, 0.08),
     0 2px 6px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   width: fit-content;
   margin: 0 auto;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1), background 0.4s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
@@ -454,7 +578,7 @@ import Navigation from '../components/Navigation.astro';
   right: 0;
   bottom: 0;
   border-radius: 24px;
-  background: radial-gradient(circle at 30% 30%, rgba(33, 150, 243, 0.15) 0%, transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.15) 0%, transparent 60%);
   z-index: 0;
   pointer-events: none;
 }
@@ -466,7 +590,7 @@ import Navigation from '../components/Navigation.astro';
   right: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(0, 105, 148, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.1) 0%, transparent 70%);
   opacity: 0.4;
   z-index: 0;
   pointer-events: none;
@@ -475,16 +599,16 @@ import Navigation from '../components/Navigation.astro';
 .processing-circle:hover {
   transform: translateY(-4px);
   box-shadow: 
-    0 12px 32px rgba(0, 105, 148, 0.15),
-    0 6px 16px rgba(33, 150, 243, 0.12),
+    0 12px 32px rgba(255, 193, 7, 0.15),
+    0 6px 16px rgba(255, 235, 59, 0.12),
     0 3px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  background: linear-gradient(135deg, rgba(0, 105, 148, 0.18) 0%, rgba(33, 150, 243, 0.15) 25%, rgba(66, 165, 245, 0.14) 50%, rgba(33, 150, 243, 0.15) 75%, rgba(0, 105, 148, 0.18) 100%);
-  border-color: rgba(0, 105, 148, 0.3);
+  background: linear-gradient(135deg, rgba(255, 235, 59, 0.18) 0%, rgba(255, 245, 157, 0.15) 25%, rgba(255, 193, 7, 0.14) 50%, rgba(255, 245, 157, 0.15) 75%, rgba(255, 235, 59, 0.18) 100%);
+  border-color: rgba(255, 193, 7, 0.3);
 }
 
 .processing-circle:hover::before {
-  background: radial-gradient(circle at 30% 30%, rgba(33, 150, 243, 0.2) 0%, transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.2) 0%, transparent 60%);
 }
 
 .processing-circle:hover::after {
@@ -572,7 +696,6 @@ import Navigation from '../components/Navigation.astro';
   border-color: rgba(0, 0, 0, 0.12);
 }
 
-
 .flow-icon {
   font-size: 2.5rem;
   line-height: 1;
@@ -585,9 +708,16 @@ import Navigation from '../components/Navigation.astro';
   filter: brightness(0) saturate(100%) invert(27%) sepia(8%) saturate(2000%) hue-rotate(180deg) brightness(0.3);
 }
 
+.storage-step {
+  padding: 0.75rem !important;
+  min-width: 75px !important;
+}
+
 .storage-step .flow-image {
   filter: brightness(0) saturate(100%) invert(27%) sepia(8%) saturate(2000%) hue-rotate(180deg) brightness(0.3);
   position: relative;
+  width: 32px !important;
+  height: 32px !important;
 }
 
 .flow-label {
@@ -829,9 +959,10 @@ import Navigation from '../components/Navigation.astro';
 
 .hero-content {
   display: grid;
-  grid-template-columns: 1fr 450px;
-  gap: 4rem;
+  grid-template-columns: 420px 1fr;
+  gap: 2rem;
   align-items: center;
+  justify-items: center;
   max-width: 1600px;
   margin: 0 auto;
   position: relative;
@@ -856,7 +987,7 @@ import Navigation from '../components/Navigation.astro';
 }
 
 .hero-text h1 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .hero-title {
@@ -888,7 +1019,7 @@ import Navigation from '../components/Navigation.astro';
   font-size: 1.5rem;
   font-weight: 500;
   color: #4E342E;
-  margin: 0;
+  margin: 0 0 1rem 0;
   line-height: 1.6;
   text-shadow: 0 1px 10px rgba(255, 255, 255, 0.6);
   max-width: 90%;
@@ -947,7 +1078,7 @@ import Navigation from '../components/Navigation.astro';
 
 .hero-logo-img {
   width: 100%;
-  max-width: 800px;
+  max-width: 900px;
   height: auto;
   filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.15));
   transition: transform 0.3s ease;
