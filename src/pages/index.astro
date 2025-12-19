@@ -18,8 +18,8 @@ import Navigation from '../components/Navigation.astro';
               A self-hosted data ingestion pipeline and retrieval API that streamlines and accelerates the development of RAG applications
             </p>
             <div class="hero-buttons">
-              <a href="/case-study" class="btn-primary">View Case Study</a>
-              <a href="/case-study" class="btn-secondary">Read Docs</a>
+              <a href="/case-study" class="btn-primary">Read the Case Study</a>
+              <a href="https://github.com/burrow-io" class="btn-secondary">Download from GitHub</a>
             </div>
           </div>
         </div>
@@ -30,7 +30,7 @@ import Navigation from '../components/Navigation.astro';
   <!-- White background sections -->
   <section class="content-sections">
     <div class="container">
-      <section class="feature-section feature-with-image">
+      <section class="feature-section feature-with-image feature-alternate">
         <div class="feature-image feature-image-video">
           <video src={`${import.meta.env.BASE_URL}vid-burrow.mp4`} controls autoplay loop muted class="feature-video">
             Your browser does not support the video tag.
@@ -90,7 +90,7 @@ import Navigation from '../components/Navigation.astro';
         </div>
       </section>
 
-      <section class="feature-section feature-with-image">
+      <section class="feature-section feature-with-image feature-alternate">
         <div class="feature-image feature-image-cli">
           <img src={`${import.meta.env.BASE_URL}cli-ascii.png`} alt="Burrow CLI Screenshot" class="cli-image" />
         </div>
@@ -105,11 +105,11 @@ import Navigation from '../components/Navigation.astro';
       <section class="feature-section next-steps">
         <h2>Next Steps</h2>
         <p>
-          Ready to dive deeper into Burrow? Explore our comprehensive case study or get started with the documentation.
+          Ready to dive deeper into Burrow? Explore our comprehensive case study or download from GitHub.
         </p>
         <div class="next-steps-buttons">
-          <a href="/case-study" class="btn-primary">Case Study - Learn How We Built Burrow</a>
-          <a href="/case-study" class="btn-secondary">Get Started</a>
+          <a href="/case-study" class="btn-primary">Case Study</a>
+          <a href="https://github.com/burrow-io" target="_blank" rel="noopener noreferrer" class="btn-secondary">Download from GitHub</a>
         </div>
       </section>
     </div>
@@ -224,6 +224,26 @@ import Navigation from '../components/Navigation.astro';
   align-items: center;
   text-align: left;
   width: 100%;
+}
+
+/* Ensure content comes first, visual second on all screen sizes */
+.feature-content {
+  order: 1;
+}
+
+.feature-image,
+.feature-visual {
+  order: 2;
+}
+
+/* Alternate layout: visual/image on left, content on right for larger screens */
+.feature-alternate .feature-visual,
+.feature-alternate .feature-image {
+  order: 1;
+}
+
+.feature-alternate .feature-content {
+  order: 2;
 }
 
 .feature-content {
@@ -555,12 +575,12 @@ import Navigation from '../components/Navigation.astro';
   align-items: center;
   justify-content: center;
   padding: 1.75rem 2.5rem;
-  background: linear-gradient(135deg, rgba(255, 235, 59, 0.12) 0%, rgba(255, 245, 157, 0.1) 25%, rgba(255, 193, 7, 0.08) 50%, rgba(255, 245, 157, 0.1) 75%, rgba(255, 235, 59, 0.12) 100%);
+  background: linear-gradient(135deg, rgba(255, 235, 59, 0.35) 0%, rgba(255, 245, 157, 0.3) 25%, rgba(255, 193, 7, 0.28) 50%, rgba(255, 245, 157, 0.3) 75%, rgba(255, 235, 59, 0.35) 100%);
   border-radius: 24px;
-  border: 2px solid rgba(255, 193, 7, 0.2);
+  border: 2px solid rgba(255, 193, 7, 0.4);
   box-shadow: 
-    0 8px 24px rgba(255, 193, 7, 0.1),
-    0 4px 12px rgba(255, 235, 59, 0.08),
+    0 8px 24px rgba(255, 193, 7, 0.2),
+    0 4px 12px rgba(255, 235, 59, 0.15),
     0 2px 6px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
   width: fit-content;
@@ -578,7 +598,7 @@ import Navigation from '../components/Navigation.astro';
   right: 0;
   bottom: 0;
   border-radius: 24px;
-  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.15) 0%, transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.35) 0%, transparent 60%);
   z-index: 0;
   pointer-events: none;
 }
@@ -599,16 +619,16 @@ import Navigation from '../components/Navigation.astro';
 .processing-circle:hover {
   transform: translateY(-4px);
   box-shadow: 
-    0 12px 32px rgba(255, 193, 7, 0.15),
-    0 6px 16px rgba(255, 235, 59, 0.12),
+    0 12px 32px rgba(255, 193, 7, 0.25),
+    0 6px 16px rgba(255, 235, 59, 0.2),
     0 3px 8px rgba(0, 0, 0, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  background: linear-gradient(135deg, rgba(255, 235, 59, 0.18) 0%, rgba(255, 245, 157, 0.15) 25%, rgba(255, 193, 7, 0.14) 50%, rgba(255, 245, 157, 0.15) 75%, rgba(255, 235, 59, 0.18) 100%);
-  border-color: rgba(255, 193, 7, 0.3);
+  background: linear-gradient(135deg, rgba(255, 235, 59, 0.45) 0%, rgba(255, 245, 157, 0.4) 25%, rgba(255, 193, 7, 0.38) 50%, rgba(255, 245, 157, 0.4) 75%, rgba(255, 235, 59, 0.45) 100%);
+  border-color: rgba(255, 193, 7, 0.5);
 }
 
 .processing-circle:hover::before {
-  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.2) 0%, transparent 60%);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 235, 59, 0.4) 0%, transparent 60%);
 }
 
 .processing-circle:hover::after {
@@ -1108,11 +1128,9 @@ import Navigation from '../components/Navigation.astro';
     font-size: 1.3rem;
   }
 
+  /* Keep side-by-side layout on tablets, only stack on smaller screens */
   .feature-with-image {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    max-width: 900px;
-    margin: 0 auto;
+    gap: 4rem;
   }
 
   .feature-section h2 {
@@ -1167,6 +1185,76 @@ import Navigation from '../components/Navigation.astro';
 
   .hero-logo-img {
     max-width: 280px;
+  }
+
+  .feature-with-image {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: center;
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .feature-content {
+    text-align: center;
+    order: 1;
+  }
+
+  .feature-image,
+  .feature-visual {
+    order: 2;
+  }
+
+  /* On smaller screens, always show content first, even for alternate layout */
+  .feature-alternate .feature-visual,
+  .feature-alternate .feature-image {
+    order: 2;
+  }
+
+  .feature-alternate .feature-content {
+    order: 1;
+  }
+
+  .feature-section h2 {
+    font-size: 2rem;
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  .feature-section p {
+    font-size: 1.1rem;
+    text-align: center;
+    line-height: 1.7;
+  }
+
+  .feature-image img {
+    max-width: 85%;
+  }
+
+  .feature-image video {
+    max-width: 95%;
+  }
+
+  .cli-image {
+    max-width: 90% !important;
+  }
+
+  .content-sections .container {
+    gap: 4rem;
+    padding: 4rem 1.5rem;
+  }
+
+  .next-steps-buttons {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .next-steps-buttons .btn-primary,
+  .next-steps-buttons .btn-secondary {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
   }
 }
 
@@ -1237,76 +1325,6 @@ import Navigation from '../components/Navigation.astro';
 
   .hero-logo-img {
     max-width: 200px;
-  }
-}
-
-  .feature-with-image {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-    text-align: center;
-    max-width: 100%;
-    padding: 0 1rem;
-  }
-
-  .feature-content {
-    text-align: center;
-    order: 1;
-  }
-
-  .feature-image,
-  .feature-visual {
-    order: 2;
-  }
-
-  .feature-section:nth-child(even) .feature-content {
-    order: 1;
-  }
-
-  .feature-section:nth-child(even) .feature-image,
-  .feature-section:nth-child(even) .feature-visual {
-    order: 2;
-  }
-
-  .feature-section h2 {
-    font-size: 2rem;
-    text-align: center;
-    line-height: 1.3;
-  }
-
-  .feature-section p {
-    font-size: 1.1rem;
-    text-align: center;
-    line-height: 1.7;
-  }
-
-  .feature-image img {
-    max-width: 85%;
-  }
-
-  .feature-image video {
-    max-width: 95%;
-  }
-
-  .cli-image {
-    max-width: 90% !important;
-  }
-
-  .content-sections .container {
-    gap: 4rem;
-    padding: 4rem 1.5rem;
-  }
-
-  .next-steps-buttons {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  .next-steps-buttons .btn-primary,
-  .next-steps-buttons .btn-secondary {
-    width: 100%;
-    max-width: 300px;
-    text-align: center;
   }
 }
 

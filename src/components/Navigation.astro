@@ -15,12 +15,14 @@ const currentPath = Astro.url.pathname;
           <li><a href="/case-study" class={currentPath === '/case-study' ? 'active' : ''}>Case Study</a></li>
           <li><a href="/docs" class={currentPath === '/docs' ? 'active' : ''}>Docs</a></li>
           <li><a href="/team" class={currentPath === '/team' ? 'active' : ''}>Team</a></li>
+          <li>
+            <a href="https://github.com/burrow-io/burrow-cli" target="_blank" rel="noopener noreferrer" class="github-link">
+              <img src={`${import.meta.env.BASE_URL}github-color-svgrepo-com.svg`} alt="GitHub" class="github-icon" />
+            </a>
+          </li>
         </ul>
       </div>
       <div class="right-nav">
-        <a href="https://github.com/your-username/burrow" target="_blank" rel="noopener noreferrer" class="github-link">
-          <img src={`${import.meta.env.BASE_URL}github-color-svgrepo-com.svg`} alt="GitHub" class="github-icon" />
-        </a>
         <button class="mobile-menu-toggle" aria-label="Toggle mobile menu">
           <span class="hamburger-line"></span>
           <span class="hamburger-line"></span>
@@ -115,16 +117,25 @@ const currentPath = Astro.url.pathname;
   display: flex;
   align-items: center;
   text-decoration: none;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
+  padding: 0.5rem;
+  border-radius: 6px;
 }
 
 .github-link:hover {
   transform: scale(1.1);
+  background: rgba(0, 105, 148, 0.1);
 }
 
 .github-icon {
   width: 24px;
   height: 24px;
+  filter: brightness(0) saturate(100%) invert(27%) sepia(100%) saturate(2000%) hue-rotate(180deg) brightness(0.4);
+  transition: filter 0.2s ease;
+}
+
+.github-link:hover .github-icon {
+  filter: brightness(0) saturate(100%) invert(27%) sepia(100%) saturate(2000%) hue-rotate(180deg) brightness(0.6);
 }
 
 .logo-link {
@@ -156,6 +167,16 @@ const currentPath = Astro.url.pathname;
 .nav-links .active {
   color: var(--brand-primary);
   font-weight: 600;
+}
+
+.nav-links li {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links .github-link {
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
 }
 
 /* Mobile menu toggle button */

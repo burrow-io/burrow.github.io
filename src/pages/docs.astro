@@ -6,14 +6,16 @@ import ragApi from '../data/rag-api.json';
 
 // Process the Pipeline API spec safely
 const pipelineApiInfo = pipelineApi.info;
-const pipelineEndpoints = Object.entries(pipelineApi.paths).map(([path, methods]) => {
-  const httpMethods = Object.entries(methods).map(([method, details]) => ({
-    method: method.toUpperCase(),
-    methodClass: method,
-    ...details
-  }));
-  return { path, methods: httpMethods };
-});
+const pipelineEndpoints = Object.entries(pipelineApi.paths)
+  .filter(([path]) => path !== '/' && path !== '/health') // Filter out root and health check endpoints
+  .map(([path, methods]) => {
+    const httpMethods = Object.entries(methods).map(([method, details]) => ({
+      method: method.toUpperCase(),
+      methodClass: method,
+      ...details
+    }));
+    return { path, methods: httpMethods };
+  });
 
 // Extract Pipeline API schemas for reference
 const pipelineSchemas = pipelineApi.components?.schemas || {};
@@ -21,14 +23,16 @@ const pipelineSecuritySchemes = pipelineApi.components?.securitySchemes || {};
 
 // Process the RAG API spec safely
 const ragApiInfo = ragApi.info;
-const ragEndpoints = Object.entries(ragApi.paths).map(([path, methods]) => {
-  const httpMethods = Object.entries(methods).map(([method, details]) => ({
-    method: method.toUpperCase(),
-    methodClass: method,
-    ...details
-  }));
-  return { path, methods: httpMethods };
-});
+const ragEndpoints = Object.entries(ragApi.paths)
+  .filter(([path]) => path !== '/' && path !== '/health') // Filter out root and health check endpoints
+  .map(([path, methods]) => {
+    const httpMethods = Object.entries(methods).map(([method, details]) => ({
+      method: method.toUpperCase(),
+      methodClass: method,
+      ...details
+    }));
+    return { path, methods: httpMethods };
+  });
 
 // Extract RAG API schemas for reference
 const ragSchemas = ragApi.components?.schemas || {};
@@ -42,19 +46,6 @@ const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
       <!-- Sidebar Navigation -->
       <aside class="sidebar">
         <nav class="docs-nav">
-          <!-- Getting Started Section -->
-          <div class="sidebar-nav-section">
-            <button class="sidebar-nav-header" data-section="getting-started">
-              <span>Getting Started</span>
-              <span class="sidebar-arrow">▶</span>
-            </button>
-            <ul class="sidebar-nav-subsections" id="getting-started-sections">
-              <li>
-                <a href="#getting-started" class="sidebar-main-section">Quick Start</a>
-              </li>
-            </ul>
-          </div>
-
           <!-- APIs Section -->
           <div class="sidebar-nav-section">
             <button class="sidebar-nav-header" data-section="apis">
@@ -139,11 +130,6 @@ const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
         <header class="docs-header">
           <h1>Documentation</h1>
         </header>
-
-        <section id="getting-started" class="docs-section">
-          <h2>Quick Start</h2>
-          <!-- Content will be added here -->
-        </section>
 
         <section id="apis-overview" class="docs-section">
           <h2>Overview</h2>
@@ -1052,15 +1038,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Getting Started section starts expanded
-  const gettingStartedHeader = document.querySelector('[data-section="getting-started"]');
-  const gettingStartedSections = document.getElementById('getting-started-sections');
-  const gettingStartedArrow = gettingStartedHeader?.querySelector('.sidebar-arrow');
+  // APIs section starts expanded
+  const apisHeader = document.querySelector('[data-section="apis"]');
+  const apisSections = document.getElementById('apis-sections');
+  const apisArrow = apisHeader?.querySelector('.sidebar-arrow');
 
-  if (gettingStartedHeader && gettingStartedSections && gettingStartedArrow) {
-    gettingStartedHeader.classList.add('active');
-    gettingStartedSections.classList.add('expanded');
-    gettingStartedArrow.textContent = '▼';
+  if (apisHeader && apisSections && apisArrow) {
+    apisHeader.classList.add('active');
+    apisSections.classList.add('expanded');
+    apisArrow.textContent = '▼';
   }
 });
 
