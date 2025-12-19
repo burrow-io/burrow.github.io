@@ -648,18 +648,18 @@ sections.forEach((section, index) => {
   .case-study-container {
     grid-template-columns: 1fr;
     gap: 0;
+    padding: 0;
   }
 
   .sidebar {
-    position: static;
-    background: white;
-    border-right: none;
-    border-bottom: 1px solid #e9ecef;
-    padding: 1rem 0;
+    display: none;
   }
 
-  .case-study-nav {
-    padding: 0 1rem;
+  .main-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    margin: 0;
   }
 
   .case-study-nav ul {
