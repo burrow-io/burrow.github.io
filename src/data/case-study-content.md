@@ -256,7 +256,7 @@ AWS is a natural fit for Burrow given its breadth of serverless offerings and ev
 
 These components fall into the five distinct subsystems that make up Burrow:
 
-1. Pipeline API
+1. Pipeline Managment
 2. Event-driven Triggers
 3. Ingestion Task
 4. Vector Store
@@ -308,11 +308,11 @@ Requests flow through CloudFront and are authenticated with the user's RAG API t
 
 Bedrock provides access to three models required by our API.
 
-Queries are embedded with Titan Text Embeddings V2 - the same model used during ingestion - and compared with Aurora to retrieve the most relevant chunks using similarity search.
+- Queries are embedded with Titan Text Embeddings V2 - the same model used during ingestion - and compared with Aurora to retrieve the most relevant chunks using similarity search.
 
-For requests with rerank set to true, the Cohere reranking model is called to re-score retrieved chunks for relevance at the cost of additional latency.
+- For requests with rerank set to true, the Cohere reranking model is called to re-score retrieved chunks for relevance at the cost of additional latency.
 
-Requests to /query synthesize the user query, retrieved chunks, and a system prompt. The result is submitted to Amazon Titan Text to generate a response.
+- Requests to /query synthesize the user query, retrieved chunks, and a system prompt. The result is submitted to Amazon Titan Text to generate a response.
 
 ## Full Architecture
 

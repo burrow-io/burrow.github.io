@@ -191,7 +191,7 @@ const diagramConfig: Record<string, Array<{ text: string; src: string; alt: stri
   ],
   'Building Burrow': [
     { text: 'We also use other serverless components, such as S3, EventBridge, DynamoDB, Aurora Serverless, and Bedrock.', src: '/diagrams/architecture/legend.svg', alt: 'Architecture Legend', position: 'after' },
-    { text: '5. RAG API', src: '/diagrams/architecture/high-level.svg', alt: 'High-Level Architecture', position: 'after' },
+    { text: 'Pipeline Management', src: '/diagrams/architecture/high-level.svg', alt: 'High-Level Architecture', position: 'before', caption: 'For a full step-by-step guide to the CLI and installation, check out our <a href="/docs#quick-start">Quick Start Guide</a>.' },
     { text: 'CloudFront functions as a secure entry point to Burrow\'s pipeline: it routes API traffic to the Application Load Balancer while serving the web UI as a single-page application.', src: '/diagrams/architecture/file-upload.svg', alt: 'File Upload Architecture', position: 'before' },
     { text: 'Event-Driven Triggers', src: '/diagrams/architecture/event-driven.svg', alt: 'Event-Driven Architecture', position: 'after' },
     { text: 'Ingestion Task', src: '/diagrams/architecture/ingestion.svg', alt: 'Ingestion Architecture', position: 'after' },
