@@ -5,28 +5,334 @@ import Navigation from '../components/Navigation.astro';
 // Process the markdown content dynamically
 import markdownContentRaw from '../data/case-study-content.md?raw';
 
-const markdownContent = markdownContentRaw;
+// Helper function to create section ID from title
+function createSectionId(title: string): string {
+  return title.toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/^-+|-+$/g, '');
+}
 
-// Parse the markdown content into sections with subsections
-const rawSections = markdownContent.split(/^# /gm);
+// Helper function to split content before a specific text (for 'before' position)
+function splitContentBeforeText(content: string, searchText: string): [string, string] {
+  // Normalize whitespace for better matching
+  const normalizedSearch = searchText.replace(/\s+/g, ' ').trim();
+  
+  // Try exact match first
+  let index = content.indexOf(searchText);
+  
+  // If not found, try case-insensitive match
+  if (index === -1) {
+    const lowerContent = content.toLowerCase();
+    const lowerSearch = searchText.toLowerCase();
+    index = lowerContent.indexOf(lowerSearch);
+  }
+  
+  // If still not found, try with normalized whitespace
+  if (index === -1) {
+    const normalizedContent = content.replace(/\s+/g, ' ');
+    index = normalizedContent.indexOf(normalizedSearch);
+    if (index !== -1) {
+      // Map back to original content - approximate position
+      let originalIndex = 0;
+      let normalizedPos = 0;
+      for (let i = 0; i < content.length && normalizedPos < index; i++) {
+        if (/\s/.test(content[i])) {
+          if (normalizedPos < index) normalizedPos++;
+        } else {
+          normalizedPos++;
+        }
+        if (normalizedPos <= index) originalIndex = i + 1;
+      }
+      index = originalIndex;
+    }
+  }
+  
+  if (index === -1) {
+    console.warn(`Text not found for 'before' position: "${searchText.substring(0, 50)}..."`);
+    return [content, ''];
+  }
+  
+  // Find the opening tag of the element containing this text
+  const beforeText = content.substring(0, index);
+  const lastOpenTag = beforeText.lastIndexOf('<');
+  
+  if (lastOpenTag === -1) {
+    // No tag found, split at the text position
+    return [
+      content.substring(0, index),
+      content.substring(index)
+    ];
+  }
+  
+  // Find the opening tag
+  const tagMatch = beforeText.substring(lastOpenTag).match(/<(\w+)/);
+  if (!tagMatch) {
+    return [
+      content.substring(0, index),
+      content.substring(index)
+    ];
+  }
+  
+  // Split before the opening tag
+  return [
+    content.substring(0, lastOpenTag),
+    content.substring(lastOpenTag)
+  ];
+}
+
+// Helper function to split content at a specific text (for 'after' position)
+function splitContentAtText(content: string, searchText: string): [string, string] {
+  // Normalize whitespace for better matching
+  const normalizedSearch = searchText.replace(/\s+/g, ' ').trim();
+  
+  // Try exact match first
+  let index = content.indexOf(searchText);
+  
+  // If not found, try case-insensitive match
+  if (index === -1) {
+    const lowerContent = content.toLowerCase();
+    const lowerSearch = searchText.toLowerCase();
+    index = lowerContent.indexOf(lowerSearch);
+  }
+  
+  // If still not found, try with normalized whitespace
+  if (index === -1) {
+    const normalizedContent = content.replace(/\s+/g, ' ');
+    index = normalizedContent.indexOf(normalizedSearch);
+    if (index !== -1) {
+      // Map back to original content - approximate position
+      let originalIndex = 0;
+      let normalizedPos = 0;
+      for (let i = 0; i < content.length && normalizedPos < index; i++) {
+        if (/\s/.test(content[i])) {
+          if (normalizedPos < index) normalizedPos++;
+        } else {
+          normalizedPos++;
+        }
+        if (normalizedPos <= index) originalIndex = i + 1;
+      }
+      index = originalIndex;
+    }
+  }
+  
+  if (index === -1) {
+    console.warn(`Text not found: "${searchText.substring(0, 50)}..."`);
+    return [content, ''];
+  }
+  
+  // Find what element contains this text by looking backwards for the opening tag
+  const beforeText = content.substring(0, index);
+  const lastOpenTag = beforeText.lastIndexOf('<');
+  let elementType = 'p'; // default
+  
+  if (lastOpenTag !== -1) {
+    const tagMatch = beforeText.substring(lastOpenTag).match(/<(\w+)/);
+    if (tagMatch) {
+      elementType = tagMatch[1].toLowerCase();
+    }
+  }
+  
+  // Now look forward from the text to find the closing tag for this element
+  const afterText = content.substring(index);
+  const closingTagPattern = new RegExp(`</${elementType}>`, 'i');
+  let match = afterText.match(closingTagPattern);
+  
+  if (!match) {
+    // Fallback: look for any common closing tag
+    const fallbackPattern = /<\/(p|h[1-4]|div|section|article|li)>/;
+    match = afterText.match(fallbackPattern);
+  }
+  
+  if (!match) {
+    // Last resort: find next opening tag or end of content
+    const nextTagMatch = afterText.match(/<[^/]/);
+    if (nextTagMatch) {
+      const splitPosition = index + nextTagMatch.index!;
+      return [
+        content.substring(0, splitPosition),
+        content.substring(splitPosition)
+      ];
+    }
+    // If no tag found, split at end of content
+    return [content, ''];
+  }
+  
+  const closingTagIndex = match.index! + match[0].length;
+  const splitPosition = index + closingTagIndex;
+  return [
+    content.substring(0, splitPosition),
+    content.substring(splitPosition)
+  ];
+}
+
+// Diagram configuration for each section
+const diagramConfig: Record<string, Array<{ text: string; src: string; alt: string; position: string }>> = {
+  'Background': [
+    { text: 'This unwelcome phenomenon is known as "hallucination".', src: '/diagrams/background-section/llm-training.svg', alt: 'LLM Training Diagram', position: 'after' },
+    { text: '"Squirrel" and "Chipmunk" are positioned close to each other in the embedding space while "Piano" is further away.', src: '/diagrams/background-section/vectors-graph.svg', alt: 'Vectors Graph Diagram', position: 'after' },
+    { text: 'In combination with LLMs, this capability has established the RAG pattern for building AI applications.', src: '/diagrams/background-section/query-context-retrieval.png', alt: 'Query Context Retrieval Diagram', position: 'after' },
+    { text: 'In contrast to traditional ETL (Extract-Transform-Load) pipelines that tend to extract data from structured sources with clear schema and relationships, unstructured data requires a different set of processes before it is available for retrieval in the form of vector embeddings.', src: '/diagrams/background-section/detailed-etl.svg', alt: 'Detailed ETL Diagram', position: 'after' },
+  ],
+  'The Current RAG Landscape': [
+    { text: 'Multi-column layouts are read straight across from left to right, header hierarchies are flattened into plain text, and tables lose their row and column relationships.', src: '/diagrams/current-rag-landscape/bad-parsing.svg', alt: 'Bad Parsing Diagram', position: 'after' },
+    { text: 'A query like "error code 0x80070005" might return chunks for semantically related error discussions, but overlook results mentioning that exact code.', src: '/diagrams/current-rag-landscape/innacurate-vector-search.svg', alt: 'Inaccurate Vector Search Diagram', position: 'after' },
+    { text: 'This approach leverages each technique\'s strengths while minimizing its weaknesses.', src: '/diagrams/current-rag-landscape/keyword-vector-search.svg', alt: 'Keyword Vector Search Diagram', position: 'after' },
+    { text: 'The output of the model is a relevance score, which is used to rerank the candidates and return the top results.', src: '/diagrams/current-rag-landscape/reranking.svg', alt: 'Reranking Diagram', position: 'after' },
+  ],
+  'Introducing Burrow': [
+    { text: 'What Makes Burrow Unique?', src: '/diagrams/introducing-burrow/burrow-table.png', alt: 'Burrow Table Comparison', position: 'after' },
+  ],
+  'Walkthrough and Design': [
+    { text: 'Hosted via CloudFront, it supports multiple users so teams can securely share pipeline access and connect scattered knowledge bases.', src: '/diagrams/introducing-burrow/ui.png', alt: 'Burrow UI Dashboard', position: 'after' },
+    { text: 'Structured JSON is used to preserve key information about the document\'s hierarchical structure, such as filename, page numbers, and element types, as metadata.', src: '/diagrams/introducing-burrow/docling.svg', alt: 'Docling Diagram', position: 'after' },
+    { text: 'Users can configure retrieval behavior with optional parameters to enable enhanced retrieval features:', src: '/diagrams/introducing-burrow/code-snippet.png', alt: 'Code Snippet', position: 'after' },
+    { text: 'A simple command-line interface allows users to easily deploy Burrow to their AWS infrastructure and get started with their pipeline.', src: '/diagrams/introducing-burrow/cli-output.png', alt: 'CLI Output', position: 'after' },
+  ],
+  'Building Burrow': [
+    { text: 'We also use other serverless components, such as S3, EventBridge, DynamoDB, Aurora Serverless, and Bedrock.', src: '/diagrams/architecture/legend.svg', alt: 'Architecture Legend', position: 'after' },
+    { text: '5. RAG API', src: '/diagrams/architecture/high-level.svg', alt: 'High-Level Architecture', position: 'after' },
+    { text: 'CloudFront functions as a secure entry point to Burrow\'s pipeline: it routes API traffic to the Application Load Balancer while serving the web UI as a single-page application.', src: '/diagrams/architecture/file-upload.svg', alt: 'File Upload Architecture', position: 'before' },
+    { text: 'Event-Driven Triggers', src: '/diagrams/architecture/event-driven.svg', alt: 'Event-Driven Architecture', position: 'after' },
+    { text: 'Ingestion Task', src: '/diagrams/architecture/ingestion.svg', alt: 'Ingestion Architecture', position: 'after' },
+    { text: 'Vector Store', src: '/diagrams/architecture/indexes.svg', alt: 'Vector Store Indexes', position: 'after' },
+    { text: 'The RAG API is an ECS service that handles all retrieval operations - we discuss the decision to separate it from the pipeline API below in Engineering Challenges.', src: '/diagrams/architecture/rag-api.svg', alt: 'RAG API Architecture', position: 'before' },
+  ],
+  'Engineering Tradeoffs and Challenges': [
+    { text: 'The cost-savings angle, however, made this an easy decision: we estimate a 95%+ reduction in costs with this approach compared to always-on infrastructure.', src: '/diagrams/challenges/service-vs-task.svg', alt: 'Service vs Task Comparison', position: 'after' },
+    { text: 'The document is then moved to a "deleted" folder in S3 with a 90-day lifecycle policy, and a time to live (TTL) of 90 days is added to the document in DynamoDB.', src: '/diagrams/challenges/transaction-prob.svg', alt: 'Transaction Problem Diagram', position: 'after' },
+  ],
+};
+
+// Convert markdown to HTML
+function processMarkdownContent(content: string, sectionId: string): string {
+  return content
+    // Convert subsection headers with IDs
+    .replace(/^## (.+)$/gm, (match, headerTitle) => {
+      const subsectionId = `${sectionId}-${createSectionId(headerTitle)}`;
+      return `<h3 id="${subsectionId}">${headerTitle}</h3>`;
+    })
+    // Convert sub-subsection headers
+    .replace(/^### (.+)$/gm, '<h4>$1</h4>')
+    // Convert images
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="content-image" />')
+    // Convert bold text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Convert paragraphs - split by double newlines first
+    .split('\n\n')
+    .map(block => {
+      block = block.trim();
+      if (!block) return '';
+
+      // Check if this block is a numbered list
+      const lines = block.split('\n');
+      const isNumberedList = lines.length > 0 && /^\d+\./.test(lines[0].trim());
+      const isUnorderedList = lines.length > 0 && /^-/.test(lines[0].trim());
+
+      if (isNumberedList) {
+        // Convert numbered list items
+        const listItems = lines
+          .filter(line => /^\d+\./.test(line.trim()))
+          .map(line => line.replace(/^\d+\. (.+)$/, '<li>$1</li>'))
+          .join('');
+        return '<ol>' + listItems + '</ol>';
+      } else if (isUnorderedList) {
+        // Convert unordered list items
+        const listItems = lines
+          .filter(line => /^-/.test(line.trim()))
+          .map(line => line.replace(/^- (.+)$/, '<li>$1</li>'))
+          .join('');
+        return '<ul>' + listItems + '</ul>';
+      }
+      if (block.includes('<h3>') || block.includes('<h4>')) {
+        return block;
+      }
+      if (block.includes('<img')) {
+        return block;
+      }
+      return '<p>' + block.replace(/\n/g, ' ') + '</p>';
+    })
+    .join('\n');
+}
+
+// Split content based on diagram configuration
+function splitContentForDiagrams(content: string, title: string): { parts: string[]; diagrams: Array<{ src: string; alt: string }> } {
+  const config = diagramConfig[title];
+  if (!config || config.length === 0) {
+    return { parts: [content], diagrams: [] };
+  }
+
+  const parts: string[] = [];
+  const diagrams: Array<{ src: string; alt: string }> = [];
+  let remainingContent = content;
+
+  for (const diagram of config) {
+    if (title === 'Building Burrow') {
+      console.log(`Searching for diagram "${diagram.alt}" with text: "${diagram.text.substring(0, 60)}..."`);
+      console.log(`Remaining content length: ${remainingContent.length}`);
+      console.log(`Text found in remaining content: ${remainingContent.includes(diagram.text) || remainingContent.toLowerCase().includes(diagram.text.toLowerCase())}`);
+    }
+    
+    if (diagram.position === 'before') {
+      // For 'before', split before the text
+      const [before, after] = splitContentBeforeText(remainingContent, diagram.text);
+      if (after) {
+        parts.push(before);
+        diagrams.push({ src: diagram.src, alt: diagram.alt });
+        remainingContent = after;
+        if (title === 'Building Burrow') {
+          console.log(`✓ Found and split for "${diagram.alt}"`);
+        }
+      } else {
+        // If we can't find the text, log a warning but continue
+        console.warn(`Could not find text for diagram "${diagram.alt}" in section "${title}": "${diagram.text.substring(0, 50)}..."`);
+        // Don't break - continue processing other diagrams
+      }
+    } else {
+      // For 'after' (default), split after the text
+      const [before, after] = splitContentAtText(remainingContent, diagram.text);
+      if (after) {
+        parts.push(before);
+        diagrams.push({ src: diagram.src, alt: diagram.alt });
+        remainingContent = after;
+        if (title === 'Building Burrow') {
+          console.log(`✓ Found and split for "${diagram.alt}"`);
+        }
+      } else {
+        // If we can't find the text, log a warning but continue
+        console.warn(`Could not find text for diagram "${diagram.alt}" in section "${title}": "${diagram.text.substring(0, 50)}..."`);
+        if (title === 'Building Burrow') {
+          console.warn(`Remaining content snippet: ${remainingContent.substring(0, 200)}...`);
+        }
+        // Don't break - continue processing other diagrams
+      }
+    }
+  }
+
+  // Add remaining content as the last part
+  if (remainingContent) {
+    parts.push(remainingContent);
+  }
+
+  return { parts, diagrams };
+}
+
+// Parse the markdown content into sections
+const rawSections = markdownContentRaw.split(/^# /gm);
 console.log('Total raw sections found:', rawSections.length);
 
 const sections = rawSections
-  .slice(1) // Remove the first empty element
-  .filter(section => section.trim()) // Remove any empty sections
+  .slice(1)
+  .filter(section => section.trim())
   .map((section, index) => {
     const lines = section.split('\n');
     const title = lines[0].trim();
     console.log(`Processing section ${index + 1}: "${title}"`);
     let content = lines.slice(1).join('\n').trim();
 
-    // Create section ID from title
-    const id = title.toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^a-z0-9-]/g, '')
-      .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
+    const id = createSectionId(title);
 
-    // Extract subsections based on ## headers
+    // Extract subsections
     const subsections = [];
     try {
       const subsectionPattern = /^## (.+)$/gm;
@@ -36,17 +342,14 @@ const sections = rawSections
       while ((match = subsectionPattern.exec(content)) !== null) {
         subsectionMatches.push({
           title: match[1],
-          index: match.index,
-          fullMatch: match[0]
+          index: match.index
         });
       }
 
-      // Create subsection objects with IDs
       subsectionMatches.forEach((match, subIndex) => {
-        const subsectionTitle = match.title;
-        const subsectionId = `${id}-${subsectionTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+        const subsectionId = `${id}-${createSectionId(match.title)}`;
         subsections.push({
-          title: subsectionTitle,
+          title: match.title,
           id: subsectionId,
           number: `${index + 1}.${subIndex + 1}`
         });
@@ -55,82 +358,28 @@ const sections = rawSections
       console.error(`Error processing subsections for section "${title}":`, error);
     }
 
-    // Variables for content splitting
-    let contentBefore = '';
-    let contentAfter = '';
+    // Process markdown to HTML
+    let processedContent = '';
+    let contentParts: string[] = [];
+    let diagrams: Array<{ src: string; alt: string }> = [];
 
-    // Convert markdown content to HTML for proper rendering, adding IDs to subsection headers
     try {
-      content = content
-        // Convert subsection headers with IDs
-        .replace(/^## (.+)$/gm, (match, headerTitle) => {
-          const subsectionId = `${id}-${headerTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
-          return `<h3 id="${subsectionId}">${headerTitle}</h3>`;
-        })
-        // Convert sub-subsection headers
-        .replace(/^### (.+)$/gm, '<h4>$1</h4>')
-        // Convert images
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="content-image" />')
-        // Convert bold text
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Convert bullet points and lists
-        .replace(/^- (.+)$/gm, '<li>$1</li>')
-        // Convert paragraphs - split by double newlines first
-        .split('\n\n')
-        .map(block => {
-          block = block.trim();
-          if (!block) return '';
-
-          // If block contains list items, wrap in <ul>
-          if (block.includes('<li>')) {
-            return '<ul>' + block.replace(/\n/g, '') + '</ul>';
-          }
-
-          // If block contains headers, keep as is
-          if (block.includes('<h3>') || block.includes('<h4>')) {
-            return block;
-          }
-
-          // If block contains images, keep as is (images are already converted)
-          if (block.includes('<img')) {
-            return block;
-          }
-
-          // Otherwise treat as paragraph
-          const paragraph = '<p>' + block.replace(/\n/g, ' ') + '</p>';
-          return paragraph;
-        })
-        .join('\n');
-      
-      // Split content for Background section to insert diagram after "hallucination" paragraph
-      contentBefore = content;
-      contentAfter = '';
-      if (title === 'Background') {
-        const hallucinationText = 'This unwelcome phenomenon is known as "hallucination".';
-        const hallucinationIndex = content.indexOf(hallucinationText);
-        if (hallucinationIndex !== -1) {
-          // Find the closing </p> tag after the text
-          const afterText = content.substring(hallucinationIndex);
-          const closingPTagIndex = afterText.indexOf('</p>');
-          if (closingPTagIndex !== -1) {
-            const splitPosition = hallucinationIndex + closingPTagIndex + 4; // +4 for '</p>'
-            contentBefore = content.substring(0, splitPosition);
-            contentAfter = content.substring(splitPosition);
-          }
-        }
-      }
+      processedContent = processMarkdownContent(content, id);
+      const splitResult = splitContentForDiagrams(processedContent, title);
+      contentParts = splitResult.parts;
+      diagrams = splitResult.diagrams;
     } catch (error) {
       console.error(`Error processing content for section "${title}":`, error);
-      content = `<p>Error processing content for section: ${title}</p>`;
-      contentBefore = content;
-      contentAfter = '';
+      processedContent = `<p>Error processing content for section: ${title}</p>`;
+      contentParts = [processedContent];
+      diagrams = [];
     }
 
     return {
       id,
       title,
-      content: title === 'Background' && contentAfter ? contentBefore : content,
-      contentAfter: title === 'Background' && contentAfter ? contentAfter : null,
+      contentParts,
+      diagrams,
       subsections,
       number: index + 1
     };
@@ -152,28 +401,27 @@ sections.forEach((section, index) => {
       <aside class="sidebar">
         <nav class="case-study-nav">
           <ul class="direct-sections">
-            {sections.map((section, index) => {
-              console.log(`Rendering nav for section ${index + 1}: ${section.title}`);
-              return (
-                <li key={section.id} class="section-item">
-                  <div class="sidebar-main-section-container">
-                    <a href={`#${section.id}`} class="sidebar-main-section">{section.title}</a>
-                    {section.subsections && section.subsections.length > 0 && (
-                      <button class="subsection-toggle" data-section-id={section.id}>
-                        <span class="subsection-arrow">▶</span>
-                      </button>
-                    )}
-                  </div>
+            {sections.map((section) => (
+              <li class="section-item">
+                <div class="sidebar-main-section-container">
+                  <a href={`#${section.id}`} class="sidebar-main-section">{section.title}</a>
                   {section.subsections && section.subsections.length > 0 && (
-                    <ul class="sidebar-nav-sub-subsections" id={`subsections-${section.id}`}>
-                      {section.subsections.map((subsection, subIndex) => (
-                        <li key={subsection.id}><a href={`#${subsection.id}`} class="sidebar-subsection">{subsection.title}</a></li>
-                      ))}
-                    </ul>
+                    <button class="subsection-toggle" data-section-id={section.id}>
+                      <span class="subsection-arrow">▶</span>
+                    </button>
                   )}
-                </li>
-              );
-            })}
+                </div>
+                {section.subsections && section.subsections.length > 0 && (
+                  <ul class="sidebar-nav-sub-subsections" id={`subsections-${section.id}`}>
+                    {section.subsections.map((subsection) => (
+                      <li>
+                        <a href={`#${subsection.id}`} class="sidebar-subsection">{subsection.title}</a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
           </ul>
         </nav>
       </aside>
@@ -183,30 +431,28 @@ sections.forEach((section, index) => {
         {sections.map(section => (
           <section id={section.id} class="content-section">
             <h2>{section.title}</h2>
-            <div class="content-body" set:html={section.content}></div>
-            {section.id === 'background' && section.contentAfter && (
-              <div class="diagram-container">
-                <img src="/diagrams/background-section/llm-training.svg" alt="LLM Training Diagram" class="diagram" />
-              </div>
-            )}
-            {section.contentAfter && (
-              <div class="content-body" set:html={section.contentAfter}></div>
-            )}
-            {section.id === 'introducing-burrow' && (
-              <div class="diagram-container">
-                <img src={`${import.meta.env.BASE_URL}architecture-diagram.png`} alt="Burrow Architecture Diagram" class="diagram" />
-                <p class="diagram-caption">System architecture showing the complete document processing pipeline</p>
-              </div>
-            )}
+            
+            {/* Render content parts with diagrams interspersed */}
+            {section.contentParts.map((part, partIndex) => (
+              <>
+                <div class="content-body" set:html={part}></div>
+                {partIndex < section.diagrams.length && (
+                  <div class="diagram-container">
+                    <img src={section.diagrams[partIndex].src} alt={section.diagrams[partIndex].alt} class="diagram" />
+                  </div>
+                )}
+              </>
+            ))}
+
+            {/* Special case: Add full architecture diagram at the end of Building Burrow section */}
             {section.id === 'building-burrow' && (
               <div class="diagram-container">
-                <img src={`${import.meta.env.BASE_URL}vector-diagram.png`} alt="Vector Embedding Process" class="diagram" />
-                <p class="diagram-caption">Vector embedding process showing how documents are transformed into searchable embeddings</p>
+                <img src="/diagrams/architecture/full.svg" alt="Full Architecture Diagram" class="diagram" />
               </div>
             )}
+
           </section>
         ))}
-
       </article>
     </div>
   </main>
@@ -222,7 +468,6 @@ sections.forEach((section, index) => {
   margin-top: 0;
 }
 
-/* Override global white text color for case study */
 .case-study-main * {
   color: inherit !important;
 }
@@ -251,7 +496,6 @@ sections.forEach((section, index) => {
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
 }
 
-/* Custom scrollbar for sidebar */
 .sidebar::-webkit-scrollbar {
   width: 6px;
 }
@@ -278,7 +522,6 @@ sections.forEach((section, index) => {
   position: relative;
 }
 
-/* Direct sections styling */
 .direct-sections {
   list-style: none;
   margin: 0;
@@ -289,115 +532,6 @@ sections.forEach((section, index) => {
   margin: 0.5rem 0;
 }
 
-/* Sidebar Navigation Sections */
-.sidebar-nav-section {
-  margin-bottom: 0.5rem;
-  padding: 0 0.75rem;
-}
-
-.sidebar-nav-header {
-  width: 100%;
-  background: none;
-  border: none;
-  padding: 0.875rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  color: #4E342E;
-  font-size: 1.05rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  border-radius: 8px;
-  margin-bottom: 0.25rem;
-}
-
-.sidebar-nav-header:hover {
-  background: rgba(0, 105, 148, 0.08);
-  color: #006994;
-  transform: translateX(2px);
-}
-
-.sidebar-nav-header.active {
-  color: #006994;
-  background: rgba(0, 105, 148, 0.12);
-  box-shadow: 0 2px 4px rgba(0, 105, 148, 0.1);
-}
-
-.sidebar-arrow {
-  font-size: 0.75rem;
-  transition: transform 0.3s ease;
-  color: #6B5B47;
-}
-
-.sidebar-nav-header:hover .sidebar-arrow {
-  color: #006994;
-}
-
-.sidebar-nav-header.active .sidebar-arrow {
-  transform: rotate(90deg);
-  color: #006994;
-}
-
-/* Sidebar Subsections */
-.sidebar-nav-subsections {
-  list-style: none;
-  margin: 0;
-  padding: 0.5rem 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
-  opacity: 0;
-  padding-left: 0.5rem;
-}
-
-.sidebar-nav-subsections.expanded {
-  max-height: 50000px;
-  overflow: visible;
-  opacity: 1;
-  padding: 0.5rem 0;
-}
-
-.sidebar-nav-subsections li {
-  margin: 0.125rem 0;
-}
-
-.sidebar-nav-subsections a {
-  color: #6B5B47;
-  text-decoration: none;
-  font-size: 0.975rem;
-  line-height: 1.5;
-  display: block;
-  padding: 0.625rem 1.25rem 0.625rem 1.5rem;
-  transition: all 0.2s ease;
-  border-left: 3px solid transparent;
-  border-radius: 0 6px 6px 0;
-  position: relative;
-}
-
-.sidebar-nav-subsections a::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: #006994;
-  transform: scaleY(0);
-  transition: transform 0.2s ease;
-}
-
-.sidebar-nav-subsections a:hover {
-  color: #006994;
-  background: rgba(0, 105, 148, 0.06);
-  transform: translateX(4px);
-}
-
-.sidebar-nav-subsections a:hover::before {
-  transform: scaleY(1);
-}
-
-/* Sidebar Main section links with collapsible toggle */
 .sidebar-main-section-container {
   display: flex;
   align-items: center;
@@ -467,7 +601,6 @@ sections.forEach((section, index) => {
   transform: rotate(90deg);
 }
 
-/* Nested sidebar subsection navigation */
 .sidebar-nav-sub-subsections {
   list-style: none;
   margin: 0.25rem 0;
@@ -525,34 +658,15 @@ sections.forEach((section, index) => {
   overflow-x: hidden;
 }
 
-.content-header {
-  margin-bottom: 3rem;
-  padding-bottom: 2rem;
-  border-bottom: 1px solid #e9ecef;
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  scroll-margin-top: 100px;
-}
-
-.content-header h1 {
-  color: #4E342E;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-}
-
-.lead {
-  font-size: 1.25rem;
-  color: #6B5B47;
-  line-height: 1.6;
-  margin: 0;
-}
-
 .content-section {
   margin-bottom: 4rem;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   scroll-margin-top: 100px;
+  overflow-x: hidden;
+  word-wrap: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .content-section h2 {
@@ -574,8 +688,11 @@ sections.forEach((section, index) => {
   font-size: 1.9rem;
   line-height: 1.7;
   margin-bottom: 1.5rem;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  box-sizing: border-box;
 }
-
 
 .content-section h3 {
   color: #4E342E !important;
@@ -610,7 +727,6 @@ sections.forEach((section, index) => {
   font-weight: 600;
 }
 
-/* Additional specific targeting for the dynamically generated content */
 .content-section div p {
   color: #6B5B47 !important;
 }
@@ -635,15 +751,27 @@ sections.forEach((section, index) => {
   color: #4E342E !important;
 }
 
+.content-body {
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.content-section div {
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
 .diagram-container {
   width: 100%;
   max-width: 100%;
   margin: 2rem 0;
   box-sizing: border-box;
   display: block;
-  /* Prevent container from expanding parent */
   min-width: 0;
-  /* Show full content without cutting off */
   overflow: visible;
 }
 
@@ -655,13 +783,9 @@ sections.forEach((section, index) => {
   height: auto !important;
   box-sizing: border-box;
   border-radius: 8px;
-  /* Prevent image from expanding container */
   min-width: 0;
-  /* Force SVG to scale properly and show full content - maintain aspect ratio */
   object-fit: contain;
-  /* Ensure SVG scales correctly */
   image-rendering: auto;
-  /* Ensure full diagram is visible */
   vertical-align: middle;
 }
 
@@ -674,7 +798,6 @@ sections.forEach((section, index) => {
   box-sizing: border-box;
 }
 
-/* Force SVG images to respect container width */
 .content-section img[src$=".svg"],
 .content-image[src$=".svg"] {
   max-width: 100% !important;
@@ -683,36 +806,9 @@ sections.forEach((section, index) => {
   display: block !important;
   box-sizing: border-box !important;
   min-width: 0 !important;
-  /* Prevent SVG from breaking layout */
   object-fit: contain !important;
 }
 
-.content-section {
-  overflow-x: hidden;
-  word-wrap: break-word;
-  /* Prevent section from expanding beyond container */
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.content-body {
-  overflow-x: hidden;
-  max-width: 100%;
-  box-sizing: border-box;
-  /* Prevent content from expanding parent */
-  min-width: 0;
-}
-
-.content-section div {
-  overflow-x: hidden;
-  max-width: 100%;
-  box-sizing: border-box;
-  /* Prevent divs from expanding parent */
-  min-width: 0;
-}
-
-/* Exception for diagram-container to allow proper display without cutting off */
-/* This handles both nested (injected) and sibling (template) cases */
 .content-section .diagram-container,
 .content-body .diagram-container,
 .content-section div .diagram-container {
@@ -723,7 +819,6 @@ sections.forEach((section, index) => {
   box-sizing: border-box !important;
 }
 
-/* Ensure diagram images are properly constrained when nested */
 .content-body .diagram-container img,
 .content-body .diagram-container .diagram,
 .content-section div .diagram-container img,
@@ -736,14 +831,6 @@ sections.forEach((section, index) => {
   object-fit: contain !important;
 }
 
-.content-section p {
-  max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  box-sizing: border-box;
-}
-
-/* Code blocks in content sections */
 .content-section pre {
   background: #f1f3f4;
   border: 1px solid #e1e4e8;
@@ -772,8 +859,14 @@ sections.forEach((section, index) => {
   font-size: 1rem;
 }
 
+.diagram-caption {
+  color: #6B5B47;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
 
-/* Mobile Responsive */
 @media (max-width: 768px) {
   .case-study-container {
     grid-template-columns: 1fr;
@@ -785,24 +878,11 @@ sections.forEach((section, index) => {
     display: none;
   }
 
-  .main-content {
-    width: 100%;
-    max-width: 100%;
-    padding: 1rem;
-    margin: 0;
-  }
-
-  .case-study-nav ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
   .content {
     padding: 1.5rem;
   }
 
-  .content-header h1 {
+  .content-section h2 {
     font-size: 2rem;
   }
 }
@@ -818,23 +898,6 @@ sections.forEach((section, index) => {
   font-size: 1.3rem;
   border-bottom: 2px solid #e9ecef;
   padding-bottom: 0.5rem;
-}
-
-.api-section h4 {
-  color: #4E342E;
-  margin: 1.5rem 0 1rem 0;
-  font-size: 1.1rem;
-}
-
-.api-section h5 {
-  color: #4E342E;
-  margin: 1.5rem 0 0.75rem 0;
-  font-size: 1rem;
-}
-
-.api-section h6 {
-  margin: 1rem 0 0.5rem 0;
-  font-size: 0.9rem;
 }
 
 .endpoint-group {
@@ -936,22 +999,6 @@ sections.forEach((section, index) => {
   margin-left: 0.5rem;
 }
 
-.param-enum {
-  color: #6B5B47;
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
-  margin-left: 1rem;
-}
-
-.content-type {
-  margin: 1rem 0;
-}
-
-.content-type ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-}
-
 .response {
   margin: 1rem 0;
   padding: 1rem;
@@ -970,14 +1017,6 @@ sections.forEach((section, index) => {
 
 .status-4 {
   color: #dc3545;
-}
-
-.status-5 {
-  color: #6f42c1;
-}
-
-.response-schema {
-  margin-top: 1rem;
 }
 
 .api-section pre {
@@ -1001,57 +1040,6 @@ sections.forEach((section, index) => {
   color: #d73a49;
 }
 
-.api-section pre code {
-  background: none;
-  padding: 0;
-  color: #24292e;
-}
-
-.schemas-section {
-  margin-top: 3rem;
-  padding-top: 2rem;
-  border-top: 2px solid #e9ecef;
-}
-
-.schema {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.schema h4 {
-  margin-top: 0;
-  color: #4E342E;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-}
-
-.schema-ref {
-  margin: 1rem 0;
-}
-
-.schema-ref em {
-  color: #6B5B47;
-  font-style: italic;
-}
-
-@media (max-width: 768px) {
-  .endpoint-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .endpoint {
-    padding: 1rem;
-  }
-
-  .endpoint-path {
-    font-size: 0.9rem;
-  }
-}
-
 </style>
 
 <style is:global>
@@ -1067,20 +1055,16 @@ sections.forEach((section, index) => {
 </style>
 
 <script>
-// Set default state and add event listeners on page load
 document.addEventListener('DOMContentLoaded', function() {
-  // Initialize subsection toggles (start collapsed)
   const subsectionToggles = document.querySelectorAll('.subsection-toggle');
   subsectionToggles.forEach(toggle => {
     const sectionId = toggle.getAttribute('data-section-id');
     const subsectionsList = document.getElementById(`subsections-${sectionId}`);
 
-    // Start collapsed
     if (subsectionsList) {
       subsectionsList.classList.remove('expanded');
     }
 
-    // Add click event listener
     toggle.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
@@ -1097,15 +1081,12 @@ function toggleSubsectionList(sectionId) {
     const isExpanded = toggle.classList.contains('expanded');
 
     if (isExpanded) {
-      // Collapse
       toggle.classList.remove('expanded');
       subsectionsList.classList.remove('expanded');
     } else {
-      // Expand
       toggle.classList.add('expanded');
       subsectionsList.classList.add('expanded');
     }
   }
 }
-
 </script>
