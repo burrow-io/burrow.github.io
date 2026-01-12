@@ -530,6 +530,20 @@ const ragSecuritySchemes = ragApi.components?.securitySchemes || {};
 /* Override body background for docs page */
 body {
   background: white !important;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+/* Prevent zoom issues on mobile */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 </style>
 
@@ -543,6 +557,8 @@ body {
   margin-top: 0;
   position: relative;
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* Override global white text color for docs */
@@ -556,6 +572,8 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   gap: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Sidebar Navigation */
@@ -788,6 +806,9 @@ body {
   max-width: none;
   position: relative;
   z-index: 1;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .docs-header {
@@ -1134,12 +1155,18 @@ body {
 @media (max-width: 768px) {
   .docs-main {
     padding-top: 80px;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 
   .docs-container {
     grid-template-columns: 1fr;
     gap: 0;
     padding: 0;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .sidebar {
@@ -1192,6 +1219,10 @@ body {
 
   .docs-content {
     padding: 1.5rem 1rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
   }
 
   .docs-header {
