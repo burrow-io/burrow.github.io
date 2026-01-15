@@ -170,14 +170,14 @@ function splitContentAtText(content: string, searchText: string): [string, strin
 const diagramConfig: Record<string, Array<{ text: string; src: string; alt: string; position: string; caption?: string }>> = {
   'Background': [
     { text: 'This unwelcome phenomenon is known as "hallucination".', src: '/diagrams/background-section/llm-training.svg', alt: 'LLM Training Diagram', position: 'after' },
-    { text: '"Squirrel" and "Chipmunk" are positioned close to each other in the embedding space while "Piano" is further away.', src: '/diagrams/background-section/vectors-graph.svg', alt: 'Vectors Graph Diagram', position: 'after' },
-    { text: 'In combination with LLMs, this capability has established the RAG pattern for building AI applications.', src: '/diagrams/background-section/query-context-retrieval.png', alt: 'Query Context Retrieval Diagram', position: 'after' },
-    { text: 'In contrast to traditional ETL (Extract-Transform-Load) pipelines that tend to extract data from structured sources with clear schema and relationships, unstructured data requires a different set of processes before it is available for retrieval in the form of vector embeddings.', src: '/diagrams/background-section/detailed-etl.svg', alt: 'Detailed ETL Diagram', position: 'after' },
+    { text: 'while an unrelated term like "Piano" appears farther away.', src: '/diagrams/background-section/vectors-graph.svg', alt: 'Vectors Graph Diagram', position: 'after' },
+    { text: 'Preparing a Document for RAG', src: '/diagrams/background-section/query-context-retrieval.png', alt: 'Query Context Retrieval Diagram', position: 'before' },
+    { text: 'Doing this for one document is feasible.', src: '/diagrams/background-section/detailed-etl.svg', alt: 'Detailed ETL Diagram', position: 'before' },
   ],
-  'The Current RAG Landscape': [
+  'Production RAG Pipelines': [
     { text: 'Multi-column layouts are read straight across from left to right, header hierarchies are flattened into plain text, and tables lose their row and column relationships.', src: '/diagrams/current-rag-landscape/bad-parsing.svg', alt: 'Bad Parsing Diagram', position: 'after' },
-    { text: 'A query like "error code 0x80070005" might return chunks for semantically related error discussions, but overlook results mentioning that exact code.', src: '/diagrams/current-rag-landscape/innacurate-vector-search.svg', alt: 'Inaccurate Vector Search Diagram', position: 'after', caption: 'An example of vector search finding a similar but irrelevant result' },
-    { text: 'This approach leverages each technique\'s strengths while minimizing its weaknesses.', src: '/diagrams/current-rag-landscape/keyword-vector-search.svg', alt: 'Keyword Vector Search Diagram', position: 'after' },
+    
+    { text: 'The algorithm rewards chunks that rank highly in both lists', src: '/diagrams/current-rag-landscape/keyword-vector-search.svg', alt: 'Keyword Vector Search Diagram', position: 'after' },
     { text: 'The output of the model is a relevance score, which is used to rerank the candidates and return the top results.', src: '/diagrams/current-rag-landscape/reranking.svg', alt: 'Reranking Diagram', position: 'after' },
   ],
   'Introducing Burrow': [
@@ -186,11 +186,11 @@ const diagramConfig: Record<string, Array<{ text: string; src: string; alt: stri
   'Walkthrough and Design': [
     { text: 'Hosted via CloudFront, it supports multiple users so teams can securely share pipeline access and connect scattered knowledge bases.', src: '/diagrams/introducing-burrow/ui.png', alt: 'Burrow UI Dashboard', position: 'after' },
     { text: 'Structured JSON is used to preserve key information about the document\'s hierarchical structure, such as filename, page numbers, and element types, as metadata.', src: '/diagrams/introducing-burrow/docling.svg', alt: 'Docling Diagram', position: 'after', caption: 'Docling\'s parsing workflow' },
-    { text: 'Users can configure retrieval behavior with optional parameters to enable enhanced retrieval features:', src: '/diagrams/introducing-burrow/code-snippet.png', alt: 'Code Snippet', position: 'after', caption: 'For more details, see the <a href="/docs">API documentation</a>' },
+    { text: 'Optional parameters allow developers to control retrieval behavior, enabling or tuning techniques such as hybrid search, reranking, and metadata filtering as needed:', src: '/diagrams/introducing-burrow/code-snippet.png', alt: 'Code Snippet', position: 'after', caption: 'For more details, see the <a href="/docs">API documentation</a>' },
     { text: 'A simple command-line interface allows users to easily deploy Burrow to their AWS infrastructure and get started with their pipeline.', src: '/diagrams/introducing-burrow/cli-output.png', alt: 'CLI Output', position: 'after' },
   ],
   'Building Burrow': [
-    { text: 'We also use other serverless components, such as S3, EventBridge, DynamoDB, Aurora Serverless, and Bedrock.', src: '/diagrams/architecture/legend.svg', alt: 'Architecture Legend', position: 'after' },
+    { text: 'This diagram shows how Burrow’s core functions are implemented using AWS services.', src: '/diagrams/architecture/legend.svg', alt: 'Architecture Legend', position: 'after' },
     { text: 'RAG API', src: '/diagrams/architecture/high-level.svg', alt: 'High-Level Architecture', position: 'after' },
     { text: 'CloudFront functions as a secure entry point to Burrow\'s pipeline: it routes API traffic to the Application Load Balancer while serving the web UI as a single-page application.', src: '/diagrams/architecture/file-upload.svg', alt: 'File Upload Architecture', position: 'before' },
     { text: 'Event-Driven Triggers', src: '/diagrams/architecture/event-driven.svg', alt: 'Event-Driven Architecture', position: 'after' },
